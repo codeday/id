@@ -14,14 +14,16 @@ const ID_TOKEN_PRIVATE_KEYID = process.env.ID_TOKEN_PRIVATE_KEYID!;
 const ID_TOKEN_PRIVATE = process.env.ID_TOKEN_PRIVATE!;
 const ID_NTAG_PASSWORD = Buffer.alloc(4);
 ID_NTAG_PASSWORD.writeUInt32BE(Number(`0x${process.env.ID_NTAG_PASSWORD!}`));
+const STAFF_ROLES = ['rol_llN0357VXrEoIxoj', 'rol_H5SU2E05hXd2m9pJ', 'rol_6t902YZpsOynmWDt', 'rol_7zRnXs2PxtVA0ur2', 'rol_Z10C6Hfr4bfqYa4r', 'rol_kQxfFcpISf1SyqPw'];
 
-async function verifyUsername(username: string): Promise<{ givenName: string, familyName: string}> {
+async function verifyUsername(username: string): Promise<{ givenName: string, familyName: string, hasEmail: boolean }> {
 	const query = `
 		query {
 			account {
 				getUser(where:{username:"${username}"}) {
 					givenName
 					familyName
+					roles { id }
 				}
 			}
 		}
@@ -36,34 +38,45 @@ async function verifyUsername(username: string): Promise<{ givenName: string, fa
 			'Authorization': `Bearer ${token}`
 		},
 	});
-	const data = await result.json() as { data?: { account?: { getUser?: { givenName?: string, familyName?: string } } } };
-	const { givenName, familyName } = data?.data?.account?.getUser || {};
+	const data = await result.json() as { data?: { account?: { getUser?: { givenName?: string, familyName?: string, roles?: { id: string }[] } } } };
+	const { givenName, familyName, roles } = data?.data?.account?.getUser || {};
 	if (!givenName || !familyName) throw new Error(`Username ${username} not found.`);
-	return { givenName, familyName };
+	const hasEmail = !!(roles || []).find(r => STAFF_ROLES.includes(r.id));
+	return { givenName, familyName, hasEmail };
 }
 
 async function onId(id: CodeDayId) {
 	rl.question('CodeDay username -> ', async (username: string) => {
-		const { givenName, familyName } = await verifyUsername(username);
+		const { givenName, familyName, hasEmail } = await verifyUsername(username);
 
-		console.log(`Writing badge for ${givenName} ${familyName}:`);
+		console.log(`Writing badge for ${givenName} ${familyName} (${username}${hasEmail ? '@codeday.org' : ''}):`);
+		const isLocked = await id.getIsLocked();
 
-		if (await id.getIsLocked()) {
-			console.log("...logging in.")
+		if (isLocked) {
+			console.log("...logging in.");
 			await id.authenticate(ID_NTAG_PASSWORD);
-			console.log("...logged in with write password.");
-		} else {
-			console.log("...not write protected");
 		}
 
-		await id.writeCardData(givenName, familyName, username, ID_TOKEN_PRIVATE, ID_TOKEN_PRIVATE_KEYID);
+		console.log("...writing data.");
+		await id.writeCardData(
+			{
+				givenName,
+				familyName,
+				username,
+				privateKey: ID_TOKEN_PRIVATE,
+				privateKeyId: ID_TOKEN_PRIVATE_KEYID,
+				hasEmail,
+			}
+		);
 
-		try {
-			console.log("...changing password.");
-			await id.setPassword(ID_NTAG_PASSWORD);
-			console.log("...locking card.");
-			await id.lock();
-		} catch (ex) { console.log("... !! unable to change card protection."); }
+		if (!isLocked) {
+			try {
+				console.log("...changing password.");
+				await id.setPassword(ID_NTAG_PASSWORD);
+				console.log("...locking card.");
+				await id.lock();
+			} catch (ex) { console.log("... !! unable to change card protection."); }
+		}
 
 		console.log("...done!\n");
 	});

@@ -1,10 +1,10 @@
-export function createVcard(givenName: string, familyName: string, username: string): string {
+export function createVcard(givenName: string, familyName: string, email?: string): string {
 	return [
 		'BEGIN:VCARD',
 		'VERSION:2.1',
 		`N:${familyName};${givenName};;;`,
 		'ORG:CodeDay',
-		`EMAIL:${username}@codeday.org`,
+		...(email ? [`EMAIL:${email}`] : []),
 		'END:VCARD'
 	].join(`\n`);
 }

@@ -24,6 +24,15 @@ const CONTENT_TYPE_ID = 'text/x-codeday-id';
 
 const DEBUG = debug('codeday:id:CodeDayId');
 
+export interface WriteCardDataParams {
+  givenName: string
+  familyName: string
+  username: string
+  privateKey: string
+  privateKeyId: string
+  hasEmail?: boolean
+}
+
 /**
  * Methods for interfacing with NTAG215-based CodeDay ID cards.
  * 
@@ -71,15 +80,16 @@ export class CodeDayId {
     }
   }
 
-  async writeCardData (
-    givenName: string, 
-    familyName: string,
-    username: string,
-    privateKey: string,
-    keyid?: string,
-  ): Promise<void> {
-    this.vcard = createVcard(givenName, familyName, username);
-    this.token = sign({ sub: username, uid: this.uid }, privateKey, keyid);
+  async writeCardData ({
+    givenName,
+    familyName,
+    username,
+    privateKey,
+    privateKeyId,
+    hasEmail,
+  }: WriteCardDataParams): Promise<void> {
+    this.vcard = createVcard(givenName, familyName, hasEmail ? `${username}@codeday.org` : null);
+    this.token = sign({ sub: username, uid: this.uid }, privateKey, privateKeyId);
 
     const message = new ndef.Message([
       mimeRecordEncode(CONTENT_TYPE_VCARD, this.vcard),
