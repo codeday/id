@@ -48,17 +48,22 @@ async function onId(id: CodeDayId) {
 
 		console.log(`Writing badge for ${givenName} ${familyName}:`);
 
-		try {
-			id.authenticate(ID_NTAG_PASSWORD);
+		if (await id.getIsLocked()) {
+			console.log("...logging in.")
+			await id.authenticate(ID_NTAG_PASSWORD);
 			console.log("...logged in with write password.");
-		} catch (ex) {}
+		} else {
+			console.log("...not write protected");
+		}
 
 		await id.writeCardData(givenName, familyName, username, ID_TOKEN_PRIVATE, ID_TOKEN_PRIVATE_KEYID);
 
 		try {
+			console.log("...changing password.");
+			await id.setPassword(ID_NTAG_PASSWORD);
 			console.log("...locking card.");
 			await id.lock();
-		} catch (ex) { console.log("... unable to change card protection."); }
+		} catch (ex) { console.log("... !! unable to change card protection."); }
 
 		console.log("...done!\n");
 	});

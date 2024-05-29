@@ -1,6 +1,7 @@
 
 import { Reader } from '@tockawa/nfc-pcsc';
 import ndef from '@taptrack/ndef';
+import debug from 'debug';
 import {
   InvalidPasswordError,
   InvalidPakError,
@@ -21,7 +22,7 @@ import { TokenData, sign, verify } from './token';
 const CONTENT_TYPE_VCARD = 'text/vcard';
 const CONTENT_TYPE_ID = 'text/x-codeday-id';
 
-const DEBUG = console.log; // TODO
+const DEBUG = debug('codeday:id:CodeDayId');
 
 /**
  * Methods for interfacing with NTAG215-based CodeDay ID cards.
@@ -98,6 +99,11 @@ export class CodeDayId {
     const readData = await this.reader.read(4, data.length) as Buffer;
     if (!readData.equals(data)) throw new VerifyError;
     DEBUG(`... written successfully.`);
+  }
+
+  async getIsLocked(): Promise<boolean> {
+    const result = await this.reader.read(0x83, 4);
+    return result[3] !== 0xFF;
   }
 
   async lock(): Promise<void> {

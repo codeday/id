@@ -1,10 +1,11 @@
 import PCSC, { Reader } from '@tockawa/nfc-pcsc';
+import debug from 'debug';
 import { CodeDayId } from './CodeDayId';
 import { InvalidTokenError, MissingTlvNdefError, MissingTokenError } from './errors';
 export * from './errors';
 export * from './CodeDayId';
 
-const DEBUG = console.log; // TODO
+const DEBUG = debug('codeday:id:idListen');
 
 export type OnIdDelegate = (card: CodeDayId) => any;
 
