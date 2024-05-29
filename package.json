@@ -9,23 +9,23 @@
     "write": "ts-node-dev --no-notify --respawn src/bin/write"
   },
   "dependencies": {
+    "@taptrack/ndef": "^1.0.3",
+    "@tockawa/nfc-pcsc": "^0.9.3",
     "dotenv": "^16.0.0",
-    "jsonwebtoken": "^8.5.1",
-    "luxon": "^3.4.4"
+    "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {
     "@codeday/eslint-config": "^2.1.4",
     "@codeday/eslint-config-typescript": "^2.1.6",
-    "@taptrack/ndef": "^1.0.3",
-    "@tockawa/nfc-pcsc": "^0.9.3",
     "@types/jsonwebtoken": "^8.5.8",
     "@types/luxon": "^3.4.2",
-    "@types/node": "^14.0.27",
+    "@types/node": "^20.12.12",
     "@types/node-fetch": "^2.5.7",
     "cross-fetch": "^4.0.0",
     "eslint": "^7.6.0",
+    "luxon": "^3.4.4",
     "ts-node": "^8.10.2",
     "ts-node-dev": "^1.1.8",
-    "typescript": "^3.9.7"
+    "typescript": "^5.4.5"
   }
 }
