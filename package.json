@@ -1,0 +1,31 @@
+{
+  "name": "@codeday/id",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm -s run clean && tsc",
+    "verify": "ts-node-dev --no-notify --respawn src/bin/verify",
+    "write": "ts-node-dev --no-notify --respawn src/bin/write"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "luxon": "^3.4.4"
+  },
+  "devDependencies": {
+    "@codeday/eslint-config": "^2.1.4",
+    "@codeday/eslint-config-typescript": "^2.1.6",
+    "@taptrack/ndef": "^1.0.3",
+    "@tockawa/nfc-pcsc": "^0.9.3",
+    "@types/jsonwebtoken": "^8.5.8",
+    "@types/luxon": "^3.4.2",
+    "@types/node": "^14.0.27",
+    "@types/node-fetch": "^2.5.7",
+    "cross-fetch": "^4.0.0",
+    "eslint": "^7.6.0",
+    "ts-node": "^8.10.2",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^3.9.7"
+  }
+}
